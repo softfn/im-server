@@ -14,6 +14,7 @@ package net.openmob.mobileimsdk.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+
 import net.openmob.mobileimsdk.server.event.MessageQoSEventListenerS2C;
 import net.openmob.mobileimsdk.server.event.ServerEventListener;
 import net.openmob.mobileimsdk.server.protocal.Protocal;
@@ -28,8 +29,7 @@ import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ServerLauncher
-{
+public abstract class ServerLauncher {
     private static Logger logger = LoggerFactory.getLogger(ServerLauncher.class);
 
     public static String appKey = null;
@@ -40,19 +40,16 @@ public abstract class ServerLauncher
     protected ServerCoreHandler serverCoreHandler = null;
     private NioDatagramAcceptor acceptor = null;
 
-    public ServerLauncher() throws IOException
-    {
+    public ServerLauncher() throws IOException {
     }
 
-    public boolean isRunning()
-    {
+    public boolean isRunning() {
         return this.running;
     }
 
-    public void shutdown()
-    {
+    public void shutdown() {
         // ** 取消服务端网络监听
-        if(acceptor != null)
+        if (acceptor != null)
             acceptor.dispose();
 
         // ** 停止QoS机制（目前服务端只支持C2S模式的QoS）下的防重复检查线程
@@ -64,8 +61,7 @@ public abstract class ServerLauncher
         this.running = false;
     }
 
-    public void startup() throws IOException
-    {
+    public void startup() throws IOException {
         this.serverCoreHandler = initServerCoreHandler();
         initListeners();
         this.acceptor = initAcceptor();
@@ -79,15 +75,13 @@ public abstract class ServerLauncher
         logger.info("[IMCORE]UDP服务器正在端口" + PORT + "上监听中...");
     }
 
-    protected ServerCoreHandler initServerCoreHandler()
-    {
+    protected ServerCoreHandler initServerCoreHandler() {
         return new ServerCoreHandler();
     }
 
     protected abstract void initListeners();
 
-    protected NioDatagramAcceptor initAcceptor()
-    {
+    protected NioDatagramAcceptor initAcceptor() {
         NioDatagramAcceptor acceptor = new NioDatagramAcceptor();
         acceptor.getFilterChain()
                 .addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
@@ -96,13 +90,11 @@ public abstract class ServerLauncher
         return acceptor;
     }
 
-    protected void initFilter(NioDatagramAcceptor acceptor)
-    {
+    protected void initFilter(NioDatagramAcceptor acceptor) {
         DefaultIoFilterChainBuilder chain = acceptor.getFilterChain();
     }
 
-    protected void initSessionConfig(NioDatagramAcceptor acceptor)
-    {
+    protected void initSessionConfig(NioDatagramAcceptor acceptor) {
         DatagramSessionConfig dcfg = acceptor.getSessionConfig();
         dcfg.setReuseAddress(true);
 //     	dcfg.setReadBufferSize(4096);//设置接收最大字节默认2048
@@ -110,59 +102,48 @@ public abstract class ServerLauncher
         dcfg.setSendBufferSize(1024);//1024//设置输出缓冲区的大小，调整到2048后性能反而降低
     }
 
-    public ServerEventListener getServerEventListener()
-    {
+    public ServerEventListener getServerEventListener() {
         return this.serverCoreHandler.getServerEventListener();
     }
 
-    public void setServerEventListener(ServerEventListener serverEventListener)
-    {
+    public void setServerEventListener(ServerEventListener serverEventListener) {
         this.serverCoreHandler.setServerEventListener(serverEventListener);
     }
 
-    public MessageQoSEventListenerS2C getServerMessageQoSEventListener()
-    {
+    public MessageQoSEventListenerS2C getServerMessageQoSEventListener() {
         return this.serverCoreHandler.getServerMessageQoSEventListener();
     }
 
-    public void setServerMessageQoSEventListener(MessageQoSEventListenerS2C serverMessageQoSEventListener)
-    {
+    public void setServerMessageQoSEventListener(MessageQoSEventListenerS2C serverMessageQoSEventListener) {
         this.serverCoreHandler.setServerMessageQoSEventListener(serverMessageQoSEventListener);
     }
 
-    public static boolean sendData(int from_user_id, int to_user_id, String dataContent) throws Exception
-    {
+    public static boolean sendData(int from_user_id, int to_user_id, String dataContent) throws Exception {
         return ServerCoreHandler.sendData(from_user_id, to_user_id, dataContent);
     }
 
-    public static boolean sendData(int from_user_id, int to_user_id, String dataContent, boolean QoS) throws Exception
-    {
+    public static boolean sendData(int from_user_id, int to_user_id, String dataContent, boolean QoS) throws Exception {
         return ServerCoreHandler.sendData(from_user_id, to_user_id, dataContent, QoS);
     }
 
     public static boolean sendData(int from_user_id, int to_user_id
-            , String dataContent, boolean QoS, String fingerPrint) throws Exception
-    {
+            , String dataContent, boolean QoS, String fingerPrint) throws Exception {
         return ServerCoreHandler.sendData(from_user_id, to_user_id, dataContent,
                 QoS, fingerPrint);
     }
 
-    public static boolean sendData(Protocal p) throws Exception
-    {
+    public static boolean sendData(Protocal p) throws Exception {
         return ServerCoreHandler.sendData(p);
     }
 
-    public static boolean sendData(IoSession session, Protocal p) throws Exception
-    {
+    public static boolean sendData(IoSession session, Protocal p) throws Exception {
         return ServerCoreHandler.sendData(session, p);
     }
 
-    public static void setSenseMode(SenseMode mode)
-    {
+    public static void setSenseMode(SenseMode mode) {
         int expire = 0;
 
-        switch (mode)
-        {
+        switch (mode) {
             case MODE_3S:
                 // 误叛容忍度为丢3个包
                 expire = 3 * 3 + 1;
@@ -189,8 +170,7 @@ public abstract class ServerLauncher
             SESION_RECYCLER_EXPIRE = expire;
     }
 
-    public static enum SenseMode
-    {
+    public static enum SenseMode {
         MODE_3S,
 
         MODE_10S,
